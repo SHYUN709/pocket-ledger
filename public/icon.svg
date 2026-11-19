@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <rect width="512" height="512" fill="#F3EEE4"/>
+  <!-- 영수증 -->
+  <path d="M146 96h220v300l-27.5 20-27.5-20-27.5 20-27.5-20-27.5 20-27.5-20-27.5 20-27.5-20z" fill="#FBF8F2" stroke="#1E1A15" stroke-width="14" stroke-linejoin="round"/>
+  <path d="M186 160h140M186 206h90" stroke="#1E1A15" stroke-width="14" stroke-linecap="round"/>
+  <!-- 도장 -->
+  <g transform="rotate(-12 300 300)">
+    <circle cx="300" cy="300" r="78" fill="#E0522F"/>
+    <circle cx="300" cy="300" r="64" fill="none" stroke="#FBF8F2" stroke-width="6"/>
+    <path d="M262 262l20 82 18-62 18 62 20-82M252 292h96M252 314h96" fill="none" stroke="#FBF8F2" stroke-width="12" stroke-linecap="round" stroke-linejoin="round"/>
+  </g>
+</svg>
