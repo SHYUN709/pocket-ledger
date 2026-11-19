@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import BadgeSync from './components/BadgeSync'
 import TabBar, { type Tab } from './components/TabBar'
 import History from './screens/History'
 import QuickEntry from './screens/QuickEntry'
@@ -15,6 +16,7 @@ export default function App() {
         {tab === 'settings' && <Settings />}
       </main>
       <TabBar tab={tab} onChange={setTab} />
+      <BadgeSync />
     </div>
   )
 }

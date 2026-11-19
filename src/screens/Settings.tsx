@@ -1,5 +1,6 @@
 import { useLiveQuery } from 'dexie-react-hooks'
 import { useRef, useState } from 'react'
+import Segment from '../components/Segment'
 import Sheet from '../components/Sheet'
 import { useToast } from '../components/Toast'
 import {
@@ -13,6 +14,7 @@ import {
 } from '../db/backup'
 import { setSetting } from '../db/repo'
 import { db } from '../db/schema'
+import { BADGE_SETTING, badgeSupported, type BadgeMode } from '../domain/badge'
 import { formatWon } from '../domain/money'
 import { CategoryManager, FavoriteManager, RecurringManager } from './Managers'
 
@@ -23,9 +25,60 @@ export default function Settings() {
     <div className="no-scrollbar flex-1 overflow-y-auto px-5 pt-4 pb-8">
       <h1 className="mb-5 text-2xl font-bold">설정</h1>
       <ManageSection />
+      <BadgeSection />
       <BackupSection />
       <p className="mt-8 text-center text-xs text-muted">주머니 가계부 · 모든 데이터는 이 기기에만 저장돼요</p>
     </div>
+  )
+}
+
+function BadgeSection() {
+  const toast = useToast()
+  const mode = useLiveQuery(async () => ((await db.settings.get(BADGE_SETTING))?.value as BadgeMode) ?? 'off') ?? 'off'
+  const supported = badgeSupported()
+
+  const choose = async (next: BadgeMode) => {
+    await setSetting(BADGE_SETTING, next)
+    if (next === 'off') return
+    if (!supported) {
+      toast({ message: '홈 화면에 추가한 앱에서만 배지가 떠요', duration: 4000 })
+      return
+    }
+    // iOS는 알림 권한이 있어야 배지를 보여준다. 버튼을 누른 이 순간에만 물어볼 수 있다
+    if ('Notification' in window && Notification.permission === 'default') {
+      const result = await Notification.requestPermission()
+      if (result !== 'granted') {
+        toast({ message: '알림을 허용해야 배지가 보여요. 아이폰 설정 → 알림 → 가계부에서 켤 수 있어요', duration: 5000 })
+      }
+    } else if ('Notification' in window && Notification.permission === 'denied') {
+      toast({ message: '알림이 꺼져 있어요. 아이폰 설정 → 알림 → 가계부에서 켜 주세요', duration: 5000 })
+    }
+  }
+
+  return (
+    <Section
+      title="앱 아이콘 배지"
+      hint="홈 화면 아이콘에 빨간 숫자를 띄워요. 아이폰은 알림 권한이 필요하고(알림을 보내지는 않아요), 앱을 열거나 기록할 때만 숫자가 바뀌어요."
+    >
+      <div className="p-3">
+        <Segment
+          full
+          value={mode}
+          onChange={choose}
+          options={[
+            { value: 'off', label: '끄기' },
+            { value: 'streak', label: '🔥 연속 일수' },
+            { value: 'remaining', label: '💳 남은 돈(만)' },
+          ]}
+        />
+        {mode === 'remaining' && (
+          <p className="mt-2 px-1 text-xs text-muted">예: 남은 돈 513,300원 → 51. 만 원 미만이거나 마이너스면 배지를 지워요.</p>
+        )}
+        {!supported && mode !== 'off' && (
+          <p className="mt-2 px-1 text-xs text-stamp">지금 화면에서는 배지를 쓸 수 없어요. 사파리에서 홈 화면에 추가한 앱으로 열어 주세요.</p>
+        )}
+      </div>
+    </Section>
   )
 }
 
